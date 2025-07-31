@@ -5,6 +5,7 @@ theme:
     - navigation.expand  
     - content.code.copy
     - navigation.instant
+    - navigation.prune: false 
     
 markdown_extensions:
   - admonition
