@@ -1,17 +1,22 @@
-# Welcome to MkDocs
+# How to Run Locally
 
-For full documentation visit [mkdocs.org](https://www.mkdocs.org).
+To start the local development server, run these commands in your PowerShell terminal:
 
-## Commands
+```
+.\venv\Scripts\Activate.ps1 
+```
+```
+mkdocs serve
+```
 
-* `mkdocs new [dir-name]` - Create a new project.
-* `mkdocs serve` - Start the live-reloading docs server.
-* `mkdocs build` - Build the documentation site.
-* `mkdocs -h` - Print help message and exit.
+To generate auto-index (this page):
+```
+.\build-index.ps1 
+```
+-----
+# Table of Contents
 
-## Project layout
+* [First](first.md)
+* [Gits](gits.md)
+* [Py Venv](py-venv.md)
 
-    mkdocs.yml    # The configuration file.
-    docs/
-        index.md  # The documentation homepage.
-        ...       # Other markdown pages, images and other files.
