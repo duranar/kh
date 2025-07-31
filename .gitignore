@@ -1,0 +1,12 @@
+# .gitignore
+
+# Python virtual environment
+venv/
+
+# MkDocs build output
+site/
+
+# Python cache
+__pycache__/
+
+docs/.obsidian/
