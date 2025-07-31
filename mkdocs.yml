@@ -12,9 +12,10 @@ markdown_extensions:
   - pymdownx.superfences
   
 nav:
-  - Home: index.md
+  - Table of Contents: index.md
+  - '---': []
   - General:
-    - First: first.md
+    - Test: first.md
     - Github: gits.md
   - '---': []
   - Python:

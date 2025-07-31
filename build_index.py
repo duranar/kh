@@ -16,21 +16,21 @@ INDEX_MD_PATH = os.path.join("docs", "index.md")
 # This text will appear at the bottom of the generated index page.
 HOW_TO_RUN_CONTENT = """
 -----
-# How to Run Locally
+# **How to Run Locally**
 
-To start the local development server, run these commands in your PowerShell terminal:
+*To start the local development server, run these commands in your PowerShell terminal:*
 
 ```powershell
 .\\venv\\Scripts\\Activate.ps1
 mkdocs serve
 ```
 
-To generate this index page:
+**To generate this index page:**
 ```powershell
 python build_index.py
 ```
 
-In order to run the generator script successfully, you need this package:
+*In order to run the generator script successfully, you need this package:*
 ```powershell
 pip install PyYAML
 ```
@@ -49,7 +49,7 @@ def generate_index():
 
     # --- 2. Build the Page Content ---
     # Start with the main title for the table of contents
-    final_content = ["# Table of Contents", ""]
+    final_content = ["# **Table of Contents**", ""]
 
     # Loop through the 'nav' section of the YAML file
     for item in config.get('nav', []):

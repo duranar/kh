@@ -1,7 +1,7 @@
-# Table of Contents
+# **Table of Contents**
 
 ### General
-* [First](first.md)
+* [Test](first.md)
 * [Github](gits.md)
 
 ### Python
@@ -9,21 +9,21 @@
 
 
 -----
-# How to Run Locally
+# **How to Run Locally**
 
-To start the local development server, run these commands in your PowerShell terminal:
+*To start the local development server, run these commands in your PowerShell terminal:*
 
 ```powershell
 .\venv\Scripts\Activate.ps1
 mkdocs serve
 ```
 
-To generate this index page:
+**To generate this index page:**
 ```powershell
 python build_index.py
 ```
 
-In order to run the generator script successfully, you need this package:
+*In order to run the generator script successfully, you need this package:*
 ```powershell
 pip install PyYAML
 ```
