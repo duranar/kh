@@ -2,6 +2,12 @@ site_name: My Docs
 theme:
   name: material
 
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
+  
 nav:
   - Home: index.md
   - First: first.md
+  - Python Virtual Environment: py-venv.md
