@@ -1,7 +1,11 @@
 site_name: My Docs
 theme:
   name: material
-
+  features:
+    - navigation.expand  
+    - content.code.copy
+    - navigation.instant
+    
 markdown_extensions:
   - admonition
   - pymdownx.details
@@ -10,4 +14,7 @@ markdown_extensions:
 nav:
   - Home: index.md
   - First: first.md
-  - Python Virtual Environment: py-venv.md
+  - Github: gits.md
+  - '---': []
+  - Python:
+    - 'Python Virtual Environment': py-venv.md
