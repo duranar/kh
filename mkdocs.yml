@@ -13,8 +13,9 @@ markdown_extensions:
   
 nav:
   - Home: index.md
-  - First: first.md
-  - Github: gits.md
+  - General:
+    - First: first.md
+    - Github: gits.md
   - '---': []
   - Python:
     - 'Python Virtual Environment': py-venv.md

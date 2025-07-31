@@ -1,22 +1,29 @@
+# Table of Contents
+
+### General
+* [First](first.md)
+* [Github](gits.md)
+
+### Python
+* [Python Virtual Environment](py-venv.md)
+
+
+-----
 # How to Run Locally
 
 To start the local development server, run these commands in your PowerShell terminal:
 
-```
-.\venv\Scripts\Activate.ps1 
-```
-```
+```powershell
+.\venv\Scripts\Activate.ps1
 mkdocs serve
 ```
 
-To generate auto-index (this page):
+To generate this index page:
+```powershell
+python build_index.py
 ```
-.\build-index.ps1 
+
+In order to run the generator script successfully, you need this package:
+```powershell
+pip install PyYAML
 ```
------
-# Table of Contents
-
-* [First](first.md)
-* [Gits](gits.md)
-* [Py Venv](py-venv.md)
-
