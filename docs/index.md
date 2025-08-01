@@ -6,6 +6,7 @@
 
 ### Python
 * [Python Virtual Environment](py-venv.md)
+* [Python New Class Template](py-template.md)
 
 
 -----
@@ -19,6 +20,9 @@ mkdocs serve
 ```
 
 **To generate this index page:**
+```powershell
+.\venv\Scripts\Activate.ps1
+```
 ```powershell
 python build_index.py
 ```
