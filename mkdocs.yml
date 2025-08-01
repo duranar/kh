@@ -1,6 +1,9 @@
 site_name: My Docs
 theme:
   name: material
+  palette:
+    primary: deep purple
+
   features:
     - navigation.expand  
     - content.code.copy
