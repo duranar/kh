@@ -3,14 +3,14 @@ title: "Python Virtual Environments (venv) Workflow"
 description: "A complete guide to creating, managing, and sharing Python projects using venv for dependency isolation."
 ---
 
-# Python Virtual Environments (`venv`) Workflow
+# **Python Virtual Environments (`venv`) Workflow**
 
 
 !!! warning "The `venv` Folder is Not Portable"
     Do **not** manually move, copy, or rename the `venv` folder. The activation scripts inside it contain absolute paths. If you need to move a project, the correct procedure is to `pip freeze` your requirements, delete the old `venv` folder, move the project, and then create a new `venv` in the new location and install from `requirements.txt`.
 	
 ---
-## 1. Initial Project Setup
+## **1. Initial Project Setup**
 
 Do this once when you start a new project.
 
@@ -19,7 +19,6 @@ Do this once when you start a new project.
 Navigate to your project's root folder in the terminal and run the following command. This creates a new folder (named `venv` here) containing the Python interpreter and standard libraries.
 
 ```bash
-# Recommended to use Python 3
 python -m venv venv
 ```
 
@@ -43,7 +42,7 @@ __pycache__/
 *.pyc
 ```
 
-## 2. Daily Workflow
+## **2. Daily Workflow**
 
 Follow these steps every time you work on the project.
 
@@ -57,15 +56,11 @@ Before you can use the environment, you must "activate" it. The command differs 
 
 After activation, you will see the environment's name in your terminal prompt, like `(venv) C:\Users\YourUser\MyProject>`.
 
-### Step 4: Upgrade Pip (Recommended)
+!!! success "Best Practice: Upgrade Pip"
+    Once activated, it's good practice to ensure `pip` (Python's package installer) is up to date. <br/>`python -m pip install --upgrade pip`
+	
 
-Once activated, it's good practice to ensure `pip` (Python's package installer) is up to date.
-
-```bash
-python -m pip install --upgrade pip
-```
-
-### Step 5: Install and Manage Packages
+### Step 4: Install and Manage Packages
 
 Now you can install packages for your project. They will be installed *only* inside the active `venv`.
 
@@ -77,7 +72,7 @@ pip install mkdocs
 pip list
 ```
 
-### Step 6: Deactivate the Environment
+### Step 5: Deactivate the Environment
 
 When you're finished working, you can deactivate the environment to return to your global Python context.
 
@@ -87,11 +82,11 @@ deactivate
 
 ---
 
-## 3. Collaboration and Replication
+## **3. Collaboration and Replication**
 
 This is how you share your project's dependencies with others or set it up on a new machine.
 
-### Step 7: Create a `requirements.txt` File
+### Step 6: Create a `requirements.txt` File
 
 This file is a list of all the packages your project needs. To generate it automatically from your currently installed packages, run:
 
@@ -100,7 +95,7 @@ pip freeze > requirements.txt
 ```
 Commit this `requirements.txt` file to your source control. It's the key to recreating the environment.
 
-### Step 8: Install Dependencies from `requirements.txt`
+### Step 7: Install Dependencies from `requirements.txt`
 
 When you (or a collaborator) set up the project on a new machine, follow these steps:
 

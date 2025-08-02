@@ -23,7 +23,6 @@ nav:
   - Table of Contents: index.md
   - '---': []
   - General:
-    - Test: first.md
     - Github: gits.md
   - '---': []
   - Python:

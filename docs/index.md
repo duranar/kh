@@ -1,7 +1,6 @@
 # **Table of Contents**
 
 ### General
-* [Test](first.md)
 * [Github](gits.md)
 
 ### Python
@@ -28,7 +27,3 @@ mkdocs serve
 python build_index.py
 ```
 
-*In order to run the generator script successfully, you need this package:*
-```powershell
-pip install PyYAML
-```
