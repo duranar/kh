@@ -1,5 +1,7 @@
+# **Python New Class Template**
+
 ## **Function-Based Class**
-```bash
+```python
 
 import os
 import sys
@@ -135,8 +137,8 @@ if __name__ == '__main__':      # Skips next line if file was imported.
     main()                      # Runs `def main(): ...` function.
 
 ```
-*How to use it in another file*
-```
+### *How to use it in another file*
+```python
 from your_script_name import TemplateProcessor
 
 def run_processing():
@@ -157,7 +159,7 @@ run_processing()
 
 
 ## **Object-Based Class**
-```bash
+```python
 class MyClass:
     """A brief description of what this class does."""
 
