@@ -7,6 +7,7 @@
 ### Python
 * [Python Virtual Environment](py-venv.md)
 * [Python New Class Template](py-template.md)
+* [Python Decorator Timer Template](py-timer_decorator.md)
 
 
 -----
