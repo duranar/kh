@@ -4,9 +4,9 @@ description: ""
 ---
 # **Python Decorator Timer Template**
 
-A reusable Python [decorator](https://peps.python.org/pep-0318/) to measure and log the execution time of functions and class methods. Does not meddle with the actual function it measures.
+*A reusable Python [decorator](https://peps.python.org/pep-0318/) to measure and log the execution time of functions and class methods. Does not meddle with the actual function it measures.*
 
-### Timer Decorator Template
+## Timer Decorator Template
 ```python
 import logging
 import time
