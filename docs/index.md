@@ -3,6 +3,9 @@
 ### General
 * [Github](gits.md)
 
+### Quectel Yocto
+* [General](SC206E_General_Notes.md)
+
 ### Python
 * [Python Virtual Environment](py-venv.md)
 * [Python New Class Template](py-template.md)
