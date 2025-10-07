@@ -34,12 +34,12 @@ vi /lib/systemd/system/sshd.socket
 
 Inside the file, find the `ListenAddress` line:
 
-    ```ini
+    ```bash
     ListenStream 127.0.0.1:22
     ```
 **Change the address explicitly:** 
 
-    ```ini
+    ```bash
     ListenStream 22
     ```
 
