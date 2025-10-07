@@ -29,60 +29,22 @@ mount -o remount,rw /
 
 Open the configuration file with a text editor
 ```bash
-vi /etc/ssh/sshd_config
-```
-
-Inside the file, find the `ListenAddress` line. You have two options:
-
-1.  **Comment it out (Recommended):** This makes `sshd` listen on all available network interfaces (`0.0.0.0`).
-    ```ini
-    # ListenAddress 127.0.0.1
-    ```
-2.  **Change the address explicitly:** This has the same effect as commenting it out.
-    ```ini
-    ListenAddress 0.0.0.0
-    ```
-
-### Step 3: Configure the `systemd` SSH Socket
-
-**Problem:** Even after configuring `sshd_config`, the service doesn't listen on the correct port (e.g., port 22).
-
-**Solution:** On modern `systemd`-based systems, services can be "socket-activated." This means `systemd` listens on the port on behalf of the service and only starts it when a connection is made. You may need to ensure this socket is configured correctly.
-
-Open the systemd socket configuration for sshd
-```bash
 vi /lib/systemd/system/sshd.socket
 ```
 
-Ensure the file contains the following configuration, paying close attention to the `ListenStream=22` line, which sets the standard SSH port.
+Inside the file, find the `ListenAddress` line:
 
-```ini
-[Unit]
-Description=SSH Socket for Per-Connection Servers
-Conflicts=sshd.service
+    ```ini
+    ListenStream 127.0.0.1:22
+    ```
+**Change the address explicitly:** 
 
-[Socket]
-ExecStartPre=/bin/mkdir -p /var/run/sshd
-ListenStream=22
-Accept=yes
+    ```ini
+    ListenStream 22
+    ```
 
-[Install]
-WantedBy=sockets.target
-```
+then reboot.
 
-### Step 4: Restart the SSH Service
-
-After making any changes, you must restart the service for them to take effect.
-
-For systemd-based systems (most common)
-```bash
-systemctl restart sshd
-```
-
- For older init.d-based systems
-```bash
-/etc/init.d/sshd restart
-```
 
 ### Additional Notes
 
@@ -90,6 +52,43 @@ systemctl restart sshd
   * **Documentation:** For other issues, refer to the official device documentation `Quectel_SC206E_Series_Linux_User_Guide_V1.1.pdf`.
 
 -----
+
+* To enable wifi:
+```bash
+wpa_supplicant -D nl80211 -i wlan0 -c /data/misc/wifi/wpa_supplicant.conf &
+```
+```bash
+wpa_cli -i wlan0 scan
+```
+```bash
+wpa_cli -i wlan0 scan_result
+```
+```bash
+wpa_cli -i wlan0 add_network
+```
+* which will return a number, ***`<network id>`***, probably "0".
+
+
+```bash
+wpa_cli -i wlan0 set_network <network id> ssid '"ssid"'
+```
+```bash
+wpa_cli -i wlan0 set_network <network id> psk '"psk"'
+```
+
+* Connect to the network:
+```bash
+wpa_cli -i wlan0 enable_network <network id>
+```
+* Save config:
+```bash
+wpa_cli -i wlan0 save_config
+```
+* Display Wi-Fi connection list of the current known network IDs and statuses:
+```bash
+wpa_cli -i wlan0 list_network
+```
+
 
 ## 2\. GStreamer Video Commands
 
@@ -190,7 +189,7 @@ uvcvideo: Found UVC 1.00 device UNIQUESKY_CAR_CAMERA (abcd:ab51)
 
 There is no direct relationship between `/dev/videoX` device nodes and `camera=X` indices. They are used by different GStreamer elements.
 
-  * `qtiqmmfsrc camera=X`: A Qualcomm-specific element for accessing the SoC's built-in camera hardware interface (e.g., MIPI CSI-2 ports). This is used for ribbon-cable cameras, not USB cameras.
+  * qtiqmmfsrc camera=X`: A Qualcomm-specific element for accessing the SoC's built-in camera hardware interface (e.g., MIPI CSI-2 ports). This is used for ribbon-cable cameras, not USB cameras.
   * `v4l2src device=/dev/videoX`: The standard Linux element for capturing from Video4Linux2 devices. This is used for USB cameras, which are handled by the `uvcvideo` driver that creates `/dev/videoX` nodes.
 
 ### Using `v4l2-ctl` to Inspect Cameras
