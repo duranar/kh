@@ -54,7 +54,7 @@ then reboot.
 -----
 * Quick one-liner:
 ```bash
-SSID="E"; PSK="E15243!"; (wpa_supplicant -B -D nl80211 -i wlan0 -c /data/misc/wifi/wpa_supplicant.conf) && sleep 2 && ID=$(wpa_cli -i wlan0 add_network | tail -1) && wpa_cli -i wlan0 set_network $ID ssid "\"$SSID\"" && wpa_cli -i wlan0 set_network $ID psk "\"$PSK\"" && wpa_cli -i wlan0 enable_network $ID && wpa_cli -i wlan0 save_config && echo "Successfully configured and saved network ID $ID."
+SSID="E"; PSK="E15243!"; (wpa_supplicant -B -D nl80211 -i wlan0 -c /data/misc/wifi/wpa_supplicant.conf) && sleep 2 && ID=$(wpa_cli -i wlan0 add_network | tail -1) && wpa_cli -i wlan0 set_network $ID ssid "\"$SSID\"" && wpa_cli -i wlan0 set_network $ID psk "\"$PSK\"" && wpa_cli -i wlan0 enable_network $ID && wpa_cli -i wlan0 save_config && echo "Successfully configured and saved network $SSID with ID $ID."
 ```
 
 -----
