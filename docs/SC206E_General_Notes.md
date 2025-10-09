@@ -1,5 +1,5 @@
 
-# Yocto SoC (SC206E) Setup & Troubleshooting & Development Notes
+# SoC (SC206E) Setup & Troubleshooting & Development Notes
 
 For SC206E-EM 
 *LTE version (In Quectel's documentation, they refer wifi-only (non-LTE) models as WF, that does not mean devices with wifi. LTE models have both functionality.)*
@@ -34,14 +34,14 @@ vi /lib/systemd/system/sshd.socket
 
 Inside the file, find the `ListenAddress` line:
 
-    ```bash
-    ListenStream 127.0.0.1:22
-    ```
+```bash
+ListenStream 127.0.0.1:22
+```
 **Change the address explicitly:** 
 
-    ```bash
-    ListenStream 22
-    ```
+```bash
+ListenStream 22
+```
 
 then reboot.
 
@@ -52,6 +52,13 @@ then reboot.
   * **Documentation:** For other issues, refer to the official device documentation `Quectel_SC206E_Series_Linux_User_Guide_V1.1.pdf`.
 
 -----
+* Quick one-liner:
+```bash
+SSID="E"; PSK="E15243!"; (wpa_supplicant -B -D nl80211 -i wlan0 -c /data/misc/wifi/wpa_supplicant.conf) && sleep 2 && ID=$(wpa_cli -i wlan0 add_network | tail -1) && wpa_cli -i wlan0 set_network $ID ssid "\"$SSID\"" && wpa_cli -i wlan0 set_network $ID psk "\"$PSK\"" && wpa_cli -i wlan0 enable_network $ID && wpa_cli -i wlan0 save_config && echo "Successfully configured and saved network ID $ID."
+```
+
+-----
+
 
 * To enable wifi:
 ```bash
@@ -67,18 +74,19 @@ wpa_cli -i wlan0 scan_result
 wpa_cli -i wlan0 add_network
 ```
 * which will return a number, ***`<network id>`***, probably "0".
+* Guide will refer this ***`<network id>`*** as **0**.
 
 
 ```bash
-wpa_cli -i wlan0 set_network <network id> ssid '"ssid"'
+wpa_cli -i wlan0 set_network 0 ssid '"ssid"'
 ```
 ```bash
-wpa_cli -i wlan0 set_network <network id> psk '"psk"'
+wpa_cli -i wlan0 set_network 0 psk '"psk"'
 ```
 
 * Connect to the network:
 ```bash
-wpa_cli -i wlan0 enable_network <network id>
+wpa_cli -i wlan0 enable_network 0
 ```
 * Save config:
 ```bash
