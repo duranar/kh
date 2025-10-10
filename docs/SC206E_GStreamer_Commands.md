@@ -27,7 +27,7 @@ The `v4l2-ctl` utility is essential for inspecting camera properties. If the com
     v4l2-ctl --device /dev/video0 --list-formats-ext
     ```
 
-    ```text hl_lines="3 4 5 6 7 8 9 25 28 29" title="aa" 
+    ```text hl_lines="3 4 5 6 7 8 9 25 28 29" title="output" 
 	ioctl: VIDIOC_ENUM_FMT
 			Type: Video Capture
 			[0]: 'MJPG' (Motion-JPEG, compressed)
@@ -73,7 +73,7 @@ The `v4l2-ctl` utility is essential for inspecting camera properties. If the com
     v4l2-ctl --device /dev/video0 --all
     ```
 
-    ```text
+    ```text title="output" 
 	Driver Info:
 	        Driver name      : uvcvideo
 	        Card type        : Arducam USB Camera: Arducam USB
