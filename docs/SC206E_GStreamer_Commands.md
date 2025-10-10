@@ -1,0 +1,257 @@
+## 1. How to Inspect Connected Cameras
+
+### How to find connected cameras
+
+```bash
+ls /dev/video*
+```
+Which will return something like this:
+```text
+/dev/video0   /dev/video1   /dev/video2   /dev/video3   /dev/video32  /dev/video33  /dev/video4   /dev/video5
+```
+For SC206E, single-digit suffixes means camera devices. Double-digit suffixes means video encoder/decoder blocks inside the SoC.
+
+### How to inspect camera devices
+
+The `v4l2-ctl` utility is essential for inspecting camera properties. If the command is not found, the `v4l-utils` the kernel needs to be recompiled to include it (which added and compiled 10/10/2025).
+
+  * **Why are there two `/dev/video*` devices for one camera?**
+    Modern UVC cameras often expose multiple interfaces. Typically:
+    1.  **Video Capture Node:** (`/dev/video0`) The primary interface that provides the actual video stream.
+    2.  **Metadata Node:** (`/dev/video1`) A secondary interface for camera controls, sensor data, etc.
+
+  * **Get all information about a device node:**
+    The output clearly shows which node is for `Video Capture` and which is for `Metadata Capture`.
+
+    ```bash
+    v4l2-ctl --device /dev/video0 --all
+    ```
+
+    ```text
+	Driver Info:
+	        Driver name      : uvcvideo
+	        Card type        : Arducam USB Camera: Arducam USB
+	        Bus info         : usb-xhci-hcd.2.auto-1
+	        Driver version   : 5.4.191
+	        Capabilities     : 0x84a00001
+	                Video Capture
+	                Metadata Capture
+	                Streaming
+	                Extended Pix Format
+	                Device Capabilities
+	        Device Caps      : 0x04200001
+	                Video Capture
+	                Streaming
+	                Extended Pix Format
+	Media Driver Info:
+	        Driver name      : uvcvideo
+	        Model            : Arducam USB Camera: Arducam USB
+	        Serial           : UC684
+	        Bus info         : usb-xhci-hcd.2.auto-1
+	        Media version    : 5.4.191
+	        Hardware revision: 0x00000100 (256)
+	        Driver version   : 5.4.191
+	Interface Info:
+	        ID               : 0x03000002
+	        Type             : V4L Video
+	Entity Info:
+	        ID               : 0x00000001 (1)
+	        Name             : Arducam USB Camera: Arducam USB
+	        Function         : V4L2 I/O
+	        Flags         : default
+	        Pad 0x0100000d   : 0: Sink
+	          Link 0x0200001a: from remote pad 0x1000010 of entity 'Extension 4': Data, Enabled, Immutable
+	Priority: 2
+	Video input : 0 (Camera 1: ok)
+	Format Video Capture:
+	        Width/Height      : 1280/720
+	        Pixel Format      : 'YUYV' (YUYV 4:2:2)
+	        Field             : None
+	        Bytes per Line    : 2560
+	        Size Image        : 1843200
+	        Colorspace        : sRGB
+	        Transfer Function : Default (maps to sRGB)
+	        YCbCr/HSV Encoding: Default (maps to ITU-R 601)
+	        Quantization      : Default (maps to Limited Range)
+	        Flags             :
+	Crop Capability Video Capture:
+	        Bounds      : Left 0, Top 0, Width 1280, Height 720
+	        Default     : Left 0, Top 0, Width 1280, Height 720
+	        Pixel Aspect: 1/1
+	Selection Video Capture: crop_default, Left 0, Top 0, Width 1280, Height 720, Flags:
+	Selection Video Capture: crop_bounds, Left 0, Top 0, Width 1280, Height 720, Flags:
+	Streaming Parameters Video Capture:
+	        Capabilities     : timeperframe
+	        Frames per second: 10.000 (10/1)
+	        Read buffers     : 0
+	                     brightness 0x00980900 (int)    : min=-64 max=64 step=1 default=0 value=0
+	                       contrast 0x00980901 (int)    : min=0 max=64 step=1 default=32 value=32
+	                     saturation 0x00980902 (int)    : min=0 max=128 step=1 default=64 value=64
+	                            hue 0x00980903 (int)    : min=-40 max=40 step=1 default=0 value=0
+	 white_balance_temperature_auto 0x0098090c (bool)   : default=1 value=1
+	                          gamma 0x00980910 (int)    : min=72 max=500 step=1 default=100 value=100
+	                           gain 0x00980913 (int)    : min=0 max=100 step=1 default=0 value=0
+	           power_line_frequency 0x00980918 (menu)   : min=0 max=2 default=1 value=1
+	                                0: Disabled
+	                                1: 50 Hz
+	                                2: 60 Hz
+	      white_balance_temperature 0x0098091a (int)    : min=2800 max=6500 step=1 default=4600 value=4600 flags=inactive
+	                      sharpness 0x0098091b (int)    : min=0 max=6 step=1 default=2 value=2
+	         backlight_compensation 0x0098091c (int)    : min=0 max=2 step=1 default=1 value=1
+	                  exposure_auto 0x009a0901 (menu)   : min=0 max=3 default=3 value=3
+	                                1: Manual Mode
+	                                3: Aperture Priority Mode
+	              exposure_absolute 0x009a0902 (int)    : min=1 max=5000 step=1 default=156 value=156 flags=inactive
+	         exposure_auto_priority 0x009a0903 (bool)   : default=0 value=1
+    ```
+
+  * **List supported formats, resolutions, and frame rates:**
+    This command is crucial for building a correct GStreamer pipeline, as it tells you exactly what the camera can output.
+
+    ```bash
+    v4l2-ctl --device /dev/video0 --list-formats-ext
+    ```
+
+    ```text
+	ioctl: VIDIOC_ENUM_FMT
+			Type: Video Capture
+			[0]: 'MJPG' (Motion-JPEG, compressed)
+					Size: Discrete 1920x1080
+							Interval: Discrete 0.033s (30.000 fps)
+							Interval: Discrete 0.040s (25.000 fps)
+							Interval: Discrete 0.050s (20.000 fps)
+							Interval: Discrete 0.067s (15.000 fps)
+							Interval: Discrete 0.100s (10.000 fps)
+					Size: Discrete 1280x720
+							Interval: Discrete 0.033s (30.000 fps)
+							Interval: Discrete 0.040s (25.000 fps)
+							Interval: Discrete 0.050s (20.000 fps)
+							Interval: Discrete 0.067s (15.000 fps)
+							Interval: Discrete 0.100s (10.000 fps)
+					Size: Discrete 1024x576
+							Interval: Discrete 0.033s (30.000 fps)
+							Interval: Discrete 0.050s (20.000 fps)
+							Interval: Discrete 0.067s (15.000 fps)
+							Interval: Discrete 0.100s (10.000 fps)
+							Interval: Discrete 0.200s (5.000 fps)
+					...
+					...
+					...
+			[1]: 'YUYV' (YUYV 4:2:2)
+					Size: Discrete 1280x720
+							Interval: Discrete 0.100s (10.000 fps)
+					Size: Discrete 1920x1080
+							Interval: Discrete 0.200s (5.000 fps)
+					Size: Discrete 1024x576
+							Interval: Discrete 0.100s (10.000 fps)
+							Interval: Discrete 0.200s (5.000 fps)
+					...
+					...
+					...
+    ```
+
+
+
+
+## 2\. GStreamer Video Commands
+
+These commands use GStreamer for video capture and streaming.
+
+### Video Capture (Saving to File)
+
+  * **H.264 Capture from MIPI Camera:**
+
+    ```bash
+    gst-launch-1.0 -e qtiqmmfsrc camera=0 name=camsrc ! 'video/x-raw,format=NV12,width=640,height=480,framerate=30/1' ! qtic2venc ! h264parse ! mp4mux ! queue ! filesink location=/mnt/sdcard/test1.mp4
+    ```
+
+  * **H.265 (HEVC) Capture from MIPI Camera:**
+
+    ```bash
+    gst-launch-1.0 -e qtiqmmfsrc camera=0 name=camsrc ! 'video/x-raw,format=NV12,width=640,height=480,framerate=30/1' ! videoconvert ! qtic2venc ! 'video/x-h265' ! h265parse ! mp4mux ! queue ! filesink location=/mnt/sdcard/test-h265-00.mp4
+    ```
+
+  * **H.265 (HEVC) Capture from USB Camera (V4L2):**
+
+    ```bash
+    gst-launch-1.0 -e v4l2src device=/dev/video2 ! 'video/x-raw,width=1280,height=720' ! videoconvert ! qtic2venc ! 'video/x-h265' ! h265parse ! mp4mux ! filesink location=/mnt/sdcard/usb-camera-test-03.mp4
+    ```
+
+### Video Preview (Streaming to Display)
+
+*Note: These commands require a Wayland display server to be running.*
+
+  * **Stream from MIPI Camera to Screen:**
+
+    ```bash
+    WAYLAND_DISPLAY=wayland-0 XDG_RUNTIME_DIR=/run/user/root gst-launch-1.0 -e qtiqmmfsrc camera=0 name=camsrc ! 'video/x-raw,format=NV12,width=1280,height=720,framerate=30/1' ! videoconvert ! waylandsink
+    ```
+
+  * **Stream from USB Camera to Screen:**
+
+    ```bash
+    WAYLAND_DISPLAY=wayland-0 XDG_RUNTIME_DIR=/run/user/root gst-launch-1.0 -e v4l2src device=/dev/video2 ! 'video/x-raw,width=1280,height=720' ! videoconvert ! waylandsink
+    ```
+
+### Retrieving Saved Files
+
+1.  **Using ADB (Android Debug Bridge):** If the device is connected via a debug port and ADB is active:
+
+	*Note: ADB works on this SoC even though it is not running Android.*
+
+    ```bash
+    adb pull /mnt/sdcard/usb-camera-test-02.mp4 C:\local\folder
+    ```
+
+2.  **Using SCP (Secure Copy Protocol):** If SSH is working, SCP will also work. You can use PowerShell or a graphical client to transfer files.
+
+      * **Recommendation:** **WinSCP** is a reliable and popular choice for Windows. Avoid FileZilla!
+
+
+  * **Documentation:** For other issues, refer to `Quectel_SC206E_Series_Linux_Multimedia_Application_Note_V1.0.pdf`.
+
+-----
+
+## 3\. USB Camera (UVC) Troubleshooting
+
+This section covers how to diagnose and use standard USB Video Class (UVC) cameras.
+
+### Initial Diagnostics
+
+  * **Check if the USB device is recognized:**
+
+	   Run before and after plugging in the camera to see the difference
+    ```bash
+    lsusb
+    ```
+
+  * **Check if the UVC driver module is loaded:**
+
+    ```bash
+    lsmod | grep uvcvideo
+    ```
+
+      * **Important:** If this command returns nothing, it does **not** mean the driver is absent. Drivers can be built directly into the kernel instead of being loadable modules (`.ko` files). Built-in drivers are always active from boot and will not appear in `lsmod`. The most reliable way to confirm the driver is working is to check the kernel logs (`dmesg`).
+
+### Understanding Kernel Logs (`dmesg`)
+
+When you plug in a USB camera, check `dmesg` for messages like these:
+
+```log
+# Confirms the USB port is active in host mode
+xhci-hcd xhci-hcd.2.auto: new USB bus registered, assigned bus number 2
+
+# The system has read the device's descriptors
+usb 1-1: Product: UNIQUESKY_CAR_CAMERA
+
+# MOST IMPORTANT LINE: The uvcvideo driver has successfully recognized and attached to the camera.
+uvcvideo: Found UVC 1.00 device UNIQUESKY_CAR_CAMERA (abcd:ab51)
+```
+
+### Understanding Camera Sources
+
+There is no direct relationship between `/dev/videoX` device nodes and `camera=X` indices. They are used by different GStreamer elements.
+
+  * qtiqmmfsrc camera=X`: A Qualcomm-specific element for accessing the SoC's built-in camera hardware interface (e.g., MIPI CSI-2 ports). This is used for ribbon-cable cameras, not USB cameras.
+  * `v4l2src device=/dev/videoX`: The standard Linux element for capturing from Video4Linux2 devices. This is used for USB cameras, which are handled by the `uvcvideo` driver that creates `/dev/videoX` nodes.
+

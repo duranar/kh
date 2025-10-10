@@ -5,6 +5,7 @@
 
 ### Quectel Yocto
 * [General](SC206E_General_Notes.md)
+* [Camera](SC206E_GStreamer_Commands.md)
 
 ### Python
 * [Python Virtual Environment](py-venv.md)
