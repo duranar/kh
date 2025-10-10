@@ -20,6 +20,52 @@ The `v4l2-ctl` utility is essential for inspecting camera properties. If the com
     1.  **Video Capture Node:** (`/dev/video0`) The primary interface that provides the actual video stream.
     2.  **Metadata Node:** (`/dev/video1`) A secondary interface for camera controls, sensor data, etc.
 
+  * **List supported formats, resolutions, and frame rates:**
+    This command is crucial for building a correct GStreamer pipeline, as it tells you exactly what the camera can output.
+
+    ```bash
+    v4l2-ctl --device /dev/video0 --list-formats-ext
+    ```
+
+    ```text hl_lines="3 4 5 6 7 8 9 25 28 29" title="aa" 
+	ioctl: VIDIOC_ENUM_FMT
+			Type: Video Capture
+			[0]: 'MJPG' (Motion-JPEG, compressed)
+					Size: Discrete 1920x1080
+							Interval: Discrete 0.033s (30.000 fps)
+							Interval: Discrete 0.040s (25.000 fps)
+							Interval: Discrete 0.050s (20.000 fps)
+							Interval: Discrete 0.067s (15.000 fps)
+							Interval: Discrete 0.100s (10.000 fps)
+					Size: Discrete 1280x720
+							Interval: Discrete 0.033s (30.000 fps)
+							Interval: Discrete 0.040s (25.000 fps)
+							Interval: Discrete 0.050s (20.000 fps)
+							Interval: Discrete 0.067s (15.000 fps)
+							Interval: Discrete 0.100s (10.000 fps)
+					Size: Discrete 1024x576
+							Interval: Discrete 0.033s (30.000 fps)
+							Interval: Discrete 0.050s (20.000 fps)
+							Interval: Discrete 0.067s (15.000 fps)
+							Interval: Discrete 0.100s (10.000 fps)
+							Interval: Discrete 0.200s (5.000 fps)
+					...
+					...
+					...
+			[1]: 'YUYV' (YUYV 4:2:2)
+					Size: Discrete 1280x720
+							Interval: Discrete 0.100s (10.000 fps)
+					Size: Discrete 1920x1080
+							Interval: Discrete 0.200s (5.000 fps)
+					Size: Discrete 1024x576
+							Interval: Discrete 0.100s (10.000 fps)
+							Interval: Discrete 0.200s (5.000 fps)
+					...
+					...
+					...
+    ```
+
+
   * **Get all information about a device node:**
     The output clearly shows which node is for `Video Capture` and which is for `Metadata Capture`.
 
@@ -105,50 +151,6 @@ The `v4l2-ctl` utility is essential for inspecting camera properties. If the com
 	         exposure_auto_priority 0x009a0903 (bool)   : default=0 value=1
     ```
 
-  * **List supported formats, resolutions, and frame rates:**
-    This command is crucial for building a correct GStreamer pipeline, as it tells you exactly what the camera can output.
-
-    ```bash
-    v4l2-ctl --device /dev/video0 --list-formats-ext
-    ```
-
-    ```text
-	ioctl: VIDIOC_ENUM_FMT
-			Type: Video Capture
-			[0]: 'MJPG' (Motion-JPEG, compressed)
-					Size: Discrete 1920x1080
-							Interval: Discrete 0.033s (30.000 fps)
-							Interval: Discrete 0.040s (25.000 fps)
-							Interval: Discrete 0.050s (20.000 fps)
-							Interval: Discrete 0.067s (15.000 fps)
-							Interval: Discrete 0.100s (10.000 fps)
-					Size: Discrete 1280x720
-							Interval: Discrete 0.033s (30.000 fps)
-							Interval: Discrete 0.040s (25.000 fps)
-							Interval: Discrete 0.050s (20.000 fps)
-							Interval: Discrete 0.067s (15.000 fps)
-							Interval: Discrete 0.100s (10.000 fps)
-					Size: Discrete 1024x576
-							Interval: Discrete 0.033s (30.000 fps)
-							Interval: Discrete 0.050s (20.000 fps)
-							Interval: Discrete 0.067s (15.000 fps)
-							Interval: Discrete 0.100s (10.000 fps)
-							Interval: Discrete 0.200s (5.000 fps)
-					...
-					...
-					...
-			[1]: 'YUYV' (YUYV 4:2:2)
-					Size: Discrete 1280x720
-							Interval: Discrete 0.100s (10.000 fps)
-					Size: Discrete 1920x1080
-							Interval: Discrete 0.200s (5.000 fps)
-					Size: Discrete 1024x576
-							Interval: Discrete 0.100s (10.000 fps)
-							Interval: Discrete 0.200s (5.000 fps)
-					...
-					...
-					...
-    ```
 
 
 
@@ -174,12 +176,35 @@ These commands use GStreamer for video capture and streaming.
   * **H.265 (HEVC) Capture from USB Camera (V4L2):**
 
     ```bash
-    gst-launch-1.0 -e v4l2src device=/dev/video2 ! 'video/x-raw,width=1280,height=720' ! videoconvert ! qtic2venc ! 'video/x-h265' ! h265parse ! mp4mux ! filesink location=/mnt/sdcard/usb-camera-test-03.mp4
+    gst-launch-1.0 -e v4l2src device=/dev/video0 ! 'video/x-raw,width=1920,height=1080' ! videoconvert ! qtic2venc ! 'video/x-h265' ! h265parse ! mp4mux ! filesink location=/mnt/sdcard/usb-camera-test-03.mp4
     ```
+	!!! note ""
+		Note that this command does not specify format or framerate, since they can cause problems for auto negotiator
+	!!! info ""
+		If it's specified as `'video/x-raw,format=YUYV,width=1920,height=1080,framerate=30/1'`, which tells to `v4l2src` "You **must** provide a stream with **exactly** these properties". But for some reason this can cause `videoconvert`  to reject this very specific contract, leading to the `not-negotiated` error.
+	!!! tip ""
+		This `'video/x-raw,width=1920,height=1080'` command practically asks "Give me any raw format you have at 1080p"; then `v4l2src` checks with the camera driver, the driver responds "At 1080p, the only raw format I offer is `YUYV` at **5 fps**.", `v4l2src` then configures itself for that mode and offers the resulting stream to `videoconvert`.
+
+
+  * **H.265 (HEVC) Capture from USB Camera (H.264 passthrough):**
+
+	!!! warning "" 
+		This command will only work if the camera device supports H.264 passthrough as video capture format. ([refer to this](#how-to-inspect-camera-devices)).
+
+
+	
+	```bash
+	gst-launch-1.0 -e v4l2src device=/dev/video4 ! 'video/x-h264,width=1920,height=1080,framerate=30/1' ! h264parse ! mp4mux ! filesink location=/path/to/video.mp4
+	```
+
+
+
 
 ### Video Preview (Streaming to Display)
 
-*Note: These commands require a Wayland display server to be running.*
+
+!!! warning ""
+	*Note: These commands require a Wayland display server to be running on the device.*
 
   * **Stream from MIPI Camera to Screen:**
 
@@ -197,15 +222,19 @@ These commands use GStreamer for video capture and streaming.
 
 1.  **Using ADB (Android Debug Bridge):** If the device is connected via a debug port and ADB is active:
 
-	*Note: ADB works on this SoC even though it is not running Android.*
-
-    ```bash
-    adb pull /mnt/sdcard/usb-camera-test-02.mp4 C:\local\folder
-    ```
+	!!! success ""
+		ADB works on this SoC even though it is not running Android.
+	
+	```bash
+	adb pull /mnt/sdcard/usb-camera-test-02.mp4 C:\local\folder
+	```
 
 2.  **Using SCP (Secure Copy Protocol):** If SSH is working, SCP will also work. You can use PowerShell or a graphical client to transfer files.
 
-      * **Recommendation:** **WinSCP** is a reliable and popular choice for Windows. Avoid FileZilla!
+	!!! success "**Recommendation: WinSCP** "
+		* **WinSCP** is a reliable choice for Windows with many features. 
+		!!! failure ""
+			  Avoid FileZilla!
 
 
   * **Documentation:** For other issues, refer to `Quectel_SC206E_Series_Linux_Multimedia_Application_Note_V1.0.pdf`.
@@ -235,7 +264,7 @@ This section covers how to diagnose and use standard USB Video Class (UVC) camer
 
 ### Understanding Kernel Logs (`dmesg`)
 
-When you plug in a USB camera, check `dmesg` for messages like these:
+When you plug in a USB camera, check kernel logs for messages like these:
 
 ```log
 # Confirms the USB port is active in host mode
