@@ -1,5 +1,6 @@
 ## 1. How to Inspect Connected Cameras
 
+
 ### How to find connected cameras
 
 ```bash
@@ -10,6 +11,7 @@ Which will return something like this:
 /dev/video0   /dev/video1   /dev/video2   /dev/video3   /dev/video32  /dev/video33  /dev/video4   /dev/video5
 ```
 For SC206E, single-digit suffixes means camera devices. Double-digit suffixes means video encoder/decoder blocks inside the SoC.
+
 
 ### How to inspect camera devices
 
@@ -152,9 +154,7 @@ The `v4l2-ctl` utility is essential for inspecting camera properties. If the com
     ```
 
 
-
-
-
+-----
 ## 2\. GStreamer Video Commands
 
 These commands use GStreamer for video capture and streaming.
@@ -171,6 +171,18 @@ These commands use GStreamer for video capture and streaming.
 
     ```bash
     gst-launch-1.0 -e qtiqmmfsrc camera=0 name=camsrc ! 'video/x-raw,format=NV12,width=640,height=480,framerate=30/1' ! videoconvert ! qtic2venc ! 'video/x-h265' ! h265parse ! mp4mux ! queue ! filesink location=/mnt/sdcard/test-h265-00.mp4
+    ```
+
+  * **Motion JPEG Capture from USB Camera (V4L2):**
+
+    ```bash
+    gst-launch-1.0 -e v4l2src device=/dev/video0 ! 'image/jpeg,width=1920,height=1080,framerate=30/1' ! filesink location=/mnt/sdcard/raw_mjpeg_stream.mjpg
+    ```
+
+  * **Motion JPEG Capture from USB Camera (V4L2) and Re-encode:**
+
+    ```bash
+    gst-launch-1.0 -e v4l2src device=/dev/video0 ! 'image/jpeg,width=1280,height=720,framerate=15/1' ! avdec_mjpeg ! videoconvert ! qtic2venc ! 'video/x-h264' ! h264parse ! mp4mux ! queue ! filesink location=/mnt/sdcard/mjpeg_720p_15fps_to_h264.mp4
     ```
 
   * **H.265 (HEVC) Capture from USB Camera (V4L2):**
@@ -198,10 +210,7 @@ These commands use GStreamer for video capture and streaming.
 	```
 
 
-
-
 ### Video Preview (Streaming to Display)
-
 
 !!! warning ""
 	*Note: These commands require a Wayland display server to be running on the device.*
@@ -217,6 +226,29 @@ These commands use GStreamer for video capture and streaming.
     ```bash
     WAYLAND_DISPLAY=wayland-0 XDG_RUNTIME_DIR=/run/user/root gst-launch-1.0 -e v4l2src device=/dev/video2 ! 'video/x-raw,width=1280,height=720' ! videoconvert ! waylandsink
     ```
+
+
+### MJPEG Video Commands
+
+!!! warning ""
+	*Note: ffmpeg commands might not work on the SoC. Needs to be tested.*
+
+```bash title="check video properties"
+ffprobe video-name.mjpg
+```
+
+```bash title="play mjpg video file"
+ffplay -f mjpeg video-name.mjpg
+```
+
+```bash title="play mjpg video file with fixed framerate"
+ffplay -f mjpeg -framerate 30 video-name.mjpg
+```
+
+```bash title="re-encode mjpeg video file (h264)"
+gst-launch-1.0 -e filesrc location=/mnt/sdcard/MJPEG_VIDEO_FILE_NAME.mjpg ! jpegdec ! videorate ! "video/x-raw,framerate=30/1" !  videoconvert ! qtic2venc ! h264parse ! mp4mux ! filesink location=/mnt/sdcard/H264_ENCODED_VIDEO_FILE_NAME.mp4
+```
+
 
 ### Retrieving Saved Files
 
@@ -238,6 +270,7 @@ These commands use GStreamer for video capture and streaming.
 
 
   * **Documentation:** For other issues, refer to `Quectel_SC206E_Series_Linux_Multimedia_Application_Note_V1.0.pdf`.
+
 
 -----
 ## 3\. GStreamer 
@@ -272,7 +305,6 @@ Using an assembly line analogy helps to understand the core concepts:
 
 This utility serves as a dictionary for GStreamer, allowing the discovery of available elements and their specific functionalities.
 
-
 ```bash title="List all installed elements"
 gst-inspect-1.0
 ```
@@ -301,13 +333,11 @@ This element reads from any Video4Linux2 device, which includes USB camera.
 gst-inspect-1.0 v4l2src
 ```
 
-
 Key Element Properties include:
 
  * `device`: The device file to use, like `/dev/video0`.
  * `num-buffers`: How many buffers to keep in memory. Increasing this can sometimes help with performance issues but adds latency.
  * `io-mode`: How memory is handled. The default is often fine, but for advanced use, you can control whether the system copies memory or tries to share it directly (DMA).
-
 
 **videoconvert and autovideoconvert (Software Converters)**
 
@@ -337,7 +367,6 @@ The "Element Properties" provide control over the video encoding process:
 
 Properties are set in a pipeline using the syntax: `element-name property=value`.
 
-
 **Debug Tool: `GST_DEBUG`**
 The `GST_DEBUG` environment variable enables detailed logging from GStreamer elements.
 
@@ -358,7 +387,6 @@ gst-launch-1.0 -e v4l2src device=/dev/video0 ! ...
 
 
 -----
-
 ## 4\. USB Camera (UVC) Troubleshooting
 
 This section covers how to diagnose and use standard USB Video Class (UVC) cameras.
@@ -380,6 +408,7 @@ This section covers how to diagnose and use standard USB Video Class (UVC) camer
 
       * **Important:** If this command returns nothing, it does **not** mean the driver is absent. Drivers can be built directly into the kernel instead of being loadable modules (`.ko` files). Built-in drivers are always active from boot and will not appear in `lsmod`. The most reliable way to confirm the driver is working is to check the kernel logs (`dmesg`).
 
+
 ### Understanding Kernel Logs (`dmesg`)
 
 When you plug in a USB camera, check kernel logs for messages like these:
@@ -394,6 +423,7 @@ usb 1-1: Product: UNIQUESKY_CAR_CAMERA
 # MOST IMPORTANT LINE: The uvcvideo driver has successfully recognized and attached to the camera.
 uvcvideo: Found UVC 1.00 device UNIQUESKY_CAR_CAMERA (abcd:ab51)
 ```
+
 
 ### Understanding Camera Sources
 
