@@ -1,12 +1,13 @@
 
 # SoC (SC206E) Setup & Troubleshooting & Development Notes
 
-For SC206E-EM 
-*LTE version (In Quectel's documentation, they refer wifi-only (non-LTE) models as WF, that does not mean devices with wifi. LTE models have both functionality.)*
+**For SC206E-EM**  *LTE version*
+!!! info ""
+	Quectel refer to wifi-only (non-LTE) models as WF, that does not mean devices with wifi. LTE models have both functionality; WF models have only wifi.
 
 ---
 
-## 1. Fixing SSH Connectivity Issues
+## **1. Fixing SSH Connectivity Issues**
 
 The SSH daemon (`sshd`) is certainly installed but may not be active. The typical problem is that it's set to listen only for local connections (`127.0.0.1`), or the service does not listen ssh port (`22`).
 
@@ -43,29 +44,20 @@ ListenStream 127.0.0.1:22
 ListenStream 22
 ```
 
-then reboot.
+then **reboot**. 
+*This configuration made default in v0.02, 9 Oct 2025.*
+ 
 
-
-### Additional Notes
+## **Additional Notes**
 
   * **Default ssh password:**  `oelinux***`.
   * **Documentation:** For other issues, refer to the official device documentation `Quectel_SC206E_Series_Linux_User_Guide_V1.1.pdf`.
 
 -----
-* Quick form:
 
-```bash
-wpa_supplicant -D nl80211 -i wlan0 -c /data/misc/wifi/wpa_supplicant.conf &
-```
+## **2.  Enabling wifi:**
 
-```bash
-SSID="E"; PSK="E15243!"; ID=$(wpa_cli -i wlan0 add_network | tail -1) && wpa_cli -i wlan0 set_network $ID ssid "\"$SSID\"" && wpa_cli -i wlan0 set_network $ID psk "\"$PSK\"" && wpa_cli -i wlan0 enable_network $ID && wpa_cli -i wlan0 save_config && echo "Successfully configured and saved network $SSID with ID $ID."
-```
-
------
-
-
-* To enable wifi:
+* in ssh terminal:
 ```bash
 wpa_supplicant -D nl80211 -i wlan0 -c /data/misc/wifi/wpa_supplicant.conf &
 ```
@@ -78,10 +70,9 @@ wpa_cli -i wlan0 scan_result
 ```bash
 wpa_cli -i wlan0 add_network
 ```
+
 * which will return a number, ***`<network id>`***, probably "0".
 * Guide will refer this ***`<network id>`*** as **0**.
-
-
 ```bash
 wpa_cli -i wlan0 set_network 0 ssid '"ssid"'
 ```
