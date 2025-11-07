@@ -14,21 +14,33 @@ HOW_TO_RUN_CONTENT = """
 -----
 # **How to Run Locally**
 
-*To start the local development server, run these commands in your PowerShell terminal:*
+**To start the local development server, run these commands in your PowerShell terminal:**
 
 ```powershell
 .\\venv\\Scripts\\Activate.ps1
 mkdocs serve
 ```
 
-**To generate this index page:**
+**To start the local development server and be accessible to other devices on the local network**
+
+```powershell
+mkdocs serve -a 0.0.0.0:8000
+```
+*`-a` flag is `--dev-addr` option*
+<br>
+<br>
+
+*To generate this index page:*
 ```powershell
 .\\venv\\Scripts\\Activate.ps1
 ```
 ```powershell
 python build_index.py
 ```
-
+<br>
+<br>
+<br>
+-----
 """
 
 def generate_index():
