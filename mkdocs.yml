@@ -29,6 +29,7 @@ nav:
   - Quectel Yocto:
     - General: SC206E_General_Notes.md
     - Camera - GStreamer: SC206E_GStreamer_Commands.md
+    - Yocto - Build: Yocto-build.md
   - '---': []
   - Python:
     - 'Python Virtual Environment': py-venv.md
