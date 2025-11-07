@@ -1,4 +1,4 @@
-## 1. How to Inspect Connected Cameras
+## **1. How to Inspect Connected Cameras**
 
 
 ### How to find connected cameras
@@ -155,7 +155,7 @@ The `v4l2-ctl` utility is essential for inspecting camera properties. If the com
 
 
 -----
-## 2\. GStreamer Video Commands
+## **2\. GStreamer Video Commands**
 
 These commands use GStreamer for video capture and streaming.
 
@@ -249,6 +249,23 @@ ffplay -f mjpeg -framerate 30 video-name.mjpg
 gst-launch-1.0 -e filesrc location=/mnt/sdcard/MJPEG_VIDEO_FILE_NAME.mjpg ! jpegdec ! videorate ! "video/x-raw,framerate=30/1" !  videoconvert ! qtic2venc ! h264parse ! mp4mux ! filesink location=/mnt/sdcard/H264_ENCODED_VIDEO_FILE_NAME.mp4
 ```
 
+### Advanced pipelines
+```bash title="encode-decode with multiple pipeline"
+gst-launch-1.0 -e v4l2src device=/dev/video0 ! 'image/jpeg,width=1920,height=1080,framerate=15/1' ! tee name=mjpeg_tee \
+\
+mjpeg_tee. ! queue ! jpegparse ! jpegdec ! videorate ! 'video/x-raw,framerate=15/1' ! clockoverlay time-format="%Y-%m-%d %H:%M:%S" ! videoconvert ! queue ! qtic2venc control-rate=constant target-bitrate=1500000 entropy-mode=cabac idr-interval=60 ! tee name=t \
+t. ! queue ! h264parse config-interval=1 ! splitmuxsink name=smux location=/mnt/sdcard/nvr/cam1_%05d.mp4 muxer='mp4mux fragment-duration=1000' max-size-time=600000000000 send-keyframe-requests=true \
+t. ! queue ! h264parse config-interval=1 ! 'video/x-h264,stream-format=byte-stream,alignment=au' ! queue ! tmux. \
+\
+audiotestsrc is-live=true do-timestamp=true wave=silence ! audioconvert ! audioresample ! 'audio/x-raw,rate=48000,channels=2' ! avenc_aac bitrate=64000 ! aacparse ! tee name=a \
+a. ! queue ! tmux. \
+a. ! queue ! smux.audio_0 \
+\
+mpegtsmux name=tmux ! tcpserversink host=127.0.0.1 port=9001 sync=false \
+\
+mjpeg_tee. ! queue ! gdppay ! tcpserversink host=127.0.0.1 port=9003
+```
+
 
 ### Retrieving Saved Files
 
@@ -273,7 +290,7 @@ gst-launch-1.0 -e filesrc location=/mnt/sdcard/MJPEG_VIDEO_FILE_NAME.mjpg ! jpeg
 
 
 -----
-## 3\. GStreamer 
+## **3\. GStreamer**
 
 ### Gstreamer Concepts
 Using an assembly line analogy helps to understand the core concepts:
@@ -387,7 +404,7 @@ gst-launch-1.0 -e v4l2src device=/dev/video0 ! ...
 
 
 -----
-## 4\. USB Camera (UVC) Troubleshooting
+## **4\. USB Camera (UVC) Troubleshooting**
 
 This section covers how to diagnose and use standard USB Video Class (UVC) cameras.
 
@@ -407,6 +424,14 @@ This section covers how to diagnose and use standard USB Video Class (UVC) camer
     ```
 
       * **Important:** If this command returns nothing, it does **not** mean the driver is absent. Drivers can be built directly into the kernel instead of being loadable modules (`.ko` files). Built-in drivers are always active from boot and will not appear in `lsmod`. The most reliable way to confirm the driver is working is to check the kernel logs (`dmesg`).
+
+  * **Check compatible devices and print their /dev/devicename:**
+
+	   Check the devices with MJPEG stream capabilities
+    ```bash
+    for DEV in /dev/video*; do if timeout 1s v4l2-ctl --device $DEV --list-formats-ext 2>/dev/null | grep -q 'MJPG'; then echo $DEV; fi; done; echo "All devices checked."
+    ```
+
 
 
 ### Understanding Kernel Logs (`dmesg`)
@@ -432,3 +457,5 @@ There is no direct relationship between `/dev/videoX` device nodes and `camera=X
   * `qtiqmmfsrc camera=X`: A Qualcomm-specific element for accessing the SoC's built-in camera hardware interface (e.g., MIPI CSI-2 ports). This is used for ribbon-cable cameras, not USB cameras.
   * `v4l2src device=/dev/videoX`: The standard Linux element for capturing from Video4Linux2 devices. This is used for USB cameras, which are handled by the `uvcvideo` driver that creates `/dev/videoX` nodes.
 
+
+---
