@@ -48,13 +48,6 @@ then **reboot**.
 *This configuration made default in v0.02, 9 Oct 2025.*
  
 
-## **Additional Notes**
-
-  * **Default ssh password:**  `oelinux***`.
-  * **Documentation:** For other issues, refer to the official device documentation `Quectel_SC206E_Series_Linux_User_Guide_V1.1.pdf`.
-
------
-
 ## **2.  Enabling wifi:**
 
 * in ssh terminal:
@@ -94,3 +87,109 @@ wpa_cli -i wlan0 list_network
 ```
 
 
+## **3.  SD Card Hot Swap**
+
+Flush (force system) all cached data from RAM:
+```bash
+sync
+```
+unmount:
+```bash
+umount /mnt/sdcard
+```
+If it works, unmounting is done. 
+
+* If  `"Device is busy"`
+
+	Wait every process then unmount:
+```bash
+umount -l /mnt/sdcard
+```
+	*This will Immediately detach the filesystem from the directory tree (so no new process can access `/mnt/sdcard`); keep the filesystem "alive" in the background until the last busy process finishes what it's doing and closes its files then the kernel will _actually_ and _safely_ unmount the device*
+
+
+	* If the lazy unmount doesn't work (have a stuck process):
+	```bash title="print busy PIDs"
+	fuser -m /mnt/sdcard
+	```
+	```bash title="polite kill"
+	kill 1234 5678
+	```
+	```bash title="print busy PIDs again"
+	fuser -m /mnt/sdcard
+	```
+	```bash title="force kill (same as fuser -k)"
+	kill -9 1234 5678
+	```
+	```bash title="now it will unmount"
+	umount /mnt/sdcard
+	```
+	!!! danger "umount -f /dev/mmcblk1p1"
+    	llms can suggest this command, which is one of the easiest way to corrupt an sd card. It is a near-guaranteed way to cause data corruption.
+
+* Mount the new sd card:
+```bash
+mount /dev/mmcblk1p1 /mnt/sdcard
+```
+
+* Further debugging:
+```bash
+fuser -vam /mnt/sdcard
+```
+*-v verbose, -a all filesystems, -m by mountpoint*
+
+    
+    ```bash title="if there is a service which does not let it go"
+    systemctl stop sshd.service || true
+    ```
+        *but mostly `reboot`ing would be way faster then further debugging.*
+
+
+## **4.  Date Time Fix**
+
+If the device thinks it is in China:
+```bash title="check before proceeding"
+date; date +%Z%z
+```
+```bash title="desired timezone"
+ln -sf /usr/share/zoneinfo/Etc/GMT-3 /etc/localtime
+```
+```bash title="set this as default timezone"
+echo "Etc/GMT-3" > /etc/timezone 
+```
+```bash title="confirm it's set"
+date; date +%Z%z
+```
+
+
+## **5.  Force kill apps**
+
+If there were a local network problem which killed ssh terminal therefore the process inside the ssh terminal still runs but can't be observed/closed:
+
+```bash title="print programs which uses port *900*"
+netstat -tulnp | grep 900
+```
+**`-t`**: Show TCP connections.    
+**`-u`**: Show UDP connections.    
+**`-l`**: Show only listening sockets (servers waiting for a connection), not all active connections.   
+**`-n`**: Show numeric addresses and port numbers. This is much faster and clearer, as it prevents `netstat` from trying to look up names (it shows `8.8.8.8` instead of `google.com`).    
+**`-p`**: Show the pid and name of the program owning the socket. 
+
+```bash title="be nice at first"
+kill -9 23274
+```
+```bash title="wait a few seconds and check if they shut down"
+netstat -tulnp | grep 900
+```
+```bash title="kill"
+kill -9 23274
+```
+
+
+## **Additional Notes**
+
+  * **Default ssh password:**  `oelinux***`.
+  * **Documentation:** For other issues, refer to the official device documentation `Quectel_SC206E_Series_Linux_User_Guide_V1.1.pdf`.
+
+-----
+-----
