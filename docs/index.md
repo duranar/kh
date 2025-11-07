@@ -24,6 +24,13 @@
 mkdocs serve
 ```
 
+*To start the local development server and be accessible to other devices on the local network*
+
+```powershell
+mkdocs serve -a 0.0.0.0:8000
+```
+*`-a` flag is `--dev-addr` option*
+
 **To generate this index page:**
 ```powershell
 .\venv\Scripts\Activate.ps1
