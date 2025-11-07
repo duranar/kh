@@ -1,9 +1,5 @@
 # build_index.py
-# This script reads the navigation structure from mkdocs.yml
-# and generates an index.md file with a table of contents.
-#
-# Requires the PyYAML library. Install it with:
-# pip install PyYAML
+# !!!!!!!!!!!!!!!!!! THE FILE YOU ARE LOOKING FOR IS mkdocs.yml !!!!!!!!!!!!!!!!!!
 
 import yaml
 import os
