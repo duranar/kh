@@ -24,24 +24,49 @@
 !!! danger "make sure you are not root"
     Yocto builds linux kernel. If something goes wrong (and have root priviliges), your host machine's own kernel might be overwritten; which would break your host computer irreversibly.
 
-## **1. Compiling whole yocto build:**
+## **0. Creating Docker image with shared folder**
+
+First unzip the BSP inside a clean folder:
+```bash title="takes ~2 hours"
+sudo tar --use-compress-program="pigz" -xvf /archivepath/archiveimage.tar.gz -C /work_dir
+```
+
+!!! note "take a backup"
+    ```bash
+    sudo tar -czvf /archivepath/yocto_project_backup_$(date +%F).tar.gz work_dir/
+    ```
+
+Then create a new docker image, using a working docker container and work folder:
+```bash
+sudo docker run -it --name Container-Name -v /work_dir/qcm2290_linux_r60_r004:/home/test/share/qcm2290_linux_r60_r004 working-yocto-env-v1.0 /bin/bash
+```
+
+Create another terminal and run (to fix permissions), otherwise host-os users/groups will not be able to write these files:
+```bash title="cd /workdir"
+sudo chown -R 1001:1001 qcm2290_linux_r60_r004/
+```
+
+
+
+## **1. Compiling whole yocto build**
 
 !!! note "debug-perf"
     For release versions, do NOT use debug commands. Change `debug` with `perf` in commands/paths.
 
 * *Ensure you are in the `qcm2290_r60_r004` folder*
-    ```bash
+    ```bash title="always verify -> user in that terminal must NOT be root"
     source build.sh
     ```
-    ```bash
+    ```bash title="takes many hours"
     build-qti-robotics-med-image
     ```
- First time and every time you make **changes on layers** it will compile it from the beginning, which will take many hours.  *Changing layers changes the signature of the build. When the signatures does not match, yocto does not trust the previous build, so it compiles everything from the scratch.*
+ First time and every time you make **changes on layers** it will compile it from the beginning, which will take many hours.    
+ *Changing layers changes the signature of the build. When the signatures does not match, yocto does not trust the previous build, so it compiles everything from the scratch.*
 
 After the compilation, the generated images are in `build-qti-distro-rb-debug/tmp-glibc/deploy/images/qrbx210-rbx/qti-robotics-med-image/`
 
 
-## **2. Burning Firmware package:**
+## **2. Burning Firmware package**
 
 !!! note "production"
     Train and use the OS which will be used in production for burning packages.    
@@ -92,7 +117,7 @@ adb devices
 ```text title="it must print"
 USB QDLoader 9008
 ```    
-    *if not, adb reboot edl so device enters edl mode.*
+    *if not, `adb reboot edl` so device enters edl mode.*
 
 * Run `QFIL` tool, which must select correct COM port automatically and shows the Qualcomm device.
 * Select **"Flat Build"** from the radio buttons as **Build Type**.
@@ -234,6 +259,17 @@ Permanent changes on existing files:
 ...
 ```
 
+```text title="qcm2290_linux_r60_r004/poky/meta/recipes-connectivity/openssh/sshd.socket, line 6, changed:" hl_lines="4 5"
+...
+...
+...
+-ListenStream=127.0.0.1:22
++ListenStream=22
+...
+...
+...
+```
+
 
 ## **4. Bitbake Syntax** 
 
@@ -245,23 +281,7 @@ do_compile[noexec] = "1"
 
 
 
-
-
-
-
-
-
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
+---
 <br>
 <br>
 <br>
